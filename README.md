@@ -1,296 +1,98 @@
-# 🚨 SOS Localiza
+# 🚨 SOS Localiza — Entrega IoT
  
-> Sistema inteligente de mapeamento de áreas de risco com Inteligência Artificial integrada ao Oracle APEX.
+> Implementação do modelo de Inteligência Artificial integrado ao Oracle APEX com demonstração funcional via API REST.
  
 ---
  
 ## 📋 Índice
  
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Demonstração](#demonstração)
+- [Sobre a Entrega](#sobre-a-entrega)
+- [Vídeo Pitch](#vídeo-pitch)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Arquitetura do Sistema](#arquitetura-do-sistema)
-- [Funcionalidades](#funcionalidades)
 - [Modelo de IA](#modelo-de-ia)
+- [Integração com Oracle APEX](#integração-com-oracle-apex)
 - [API REST](#api-rest)
-- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Fluxo de Integração](#fluxo-de-integração)
+- [Evidências de Execução](#evidências-de-execução)
 - [Como Executar](#como-executar)
-- [Resultados](#resultados)
+- [Arquivos do Repositório](#arquivos-do-repositório)
 - [Equipe](#equipe)
 ---
  
-## 📌 Sobre o Projeto
+## 📌 Sobre a Entrega
  
-O **SOS Localiza** é uma solução mobile que exibe áreas de risco em um mapa interativo, utilizando Inteligência Artificial para classificar o nível de risco de cada região como **baixo**, **médio** ou **alto**.
+Esta entrega implementa o modelo de **Inteligência Artificial (Random Forest)** definido na sprint anterior, integrando-o à aplicação **Oracle APEX** via API REST (ORDS).
  
-O processamento e a inteligência da solução residem inteiramente no **Oracle APEX**, que expõe os dados via API REST consumida pelo aplicativo mobile em React Native. Se a API estiver indisponível, o aplicativo para de funcionar — demonstrando a dependência real do APEX para o funcionamento da solução.
+O modelo analisa dados de áreas urbanas e periféricas de São Paulo e classifica cada região com um nível de risco de alagamento:
+ 
+- 🔴 **Alto** — região com alta taxa de ocorrências por habitante
+- 🟡 **Médio** — região com taxa moderada
+- 🟢 **Baixo** — região com baixa incidência
+O resultado da IA é salvo diretamente no banco Oracle e exposto via API REST, sendo consumido pelo aplicativo mobile SOS Localiza.
  
 ---
  
-## 🎬 Demonstração
+## 🎬 Vídeo Pitch
  
-- 📹 **Vídeo Pitch:** [Link do YouTube]
-- 🔗 **API em produção:** https://oracleapex.com/ords/oracle_soslo/risco/areas
+📹 **Link do YouTube:** [INSERIR LINK AQUI]
+ 
+> Vídeo de aproximadamente 5 minutos demonstrando o modelo de IA treinado, a integração com Oracle APEX e o funcionamento da API REST.
+ 
 ---
  
 ## 🛠️ Tecnologias Utilizadas
  
 | Tecnologia | Finalidade |
 |-----------|-----------|
-| React Native | Aplicativo mobile |
-| Oracle APEX 26 | Plataforma de backend e CRUD visual |
-| Oracle Database | Banco de dados relacional |
-| ORDS (Oracle REST Data Services) | Exposição da API REST |
-| Python 3 | Treinamento do modelo de IA |
+| Python 3 | Treinamento e execução do modelo de IA |
 | Scikit-learn | Biblioteca de Machine Learning |
 | Random Forest | Algoritmo de classificação de risco |
 | Google Colab | Ambiente de treinamento da IA |
-| OpenStreetMap | Mapa interativo no app mobile |
+| Oracle APEX 26 | Plataforma de backend e CRUD visual |
+| Oracle Database | Banco de dados relacional |
+| ORDS | Exposição da API REST |
 | PL/SQL | Lógica de negócio no banco de dados |
  
 ---
  
-## 🏗️ Arquitetura do Sistema
- 
-```
-┌─────────────────────────────────────────────────────┐
-│                  App Mobile                         │
-│              (React Native +                        │
-│               OpenStreetMap)                        │
-└─────────────────────┬───────────────────────────────┘
-                      │ GET /risco/areas
-                      ▼
-┌─────────────────────────────────────────────────────┐
-│              Oracle APEX + ORDS                     │
-│                                                     │
-│  ┌─────────────────────────────────────────────┐   │
-│  │           API REST (ORDS)                   │   │
-│  │  GET    /risco/areas                        │   │
-│  │  POST   /risco/areas                        │   │
-│  │  PUT    /risco/areas/:id                    │   │
-│  │  DELETE /risco/areas/:id                    │   │
-│  └──────────────────┬──────────────────────────┘   │
-│                     │                               │
-│  ┌──────────────────▼──────────────────────────┐   │
-│  │         View: vw_areas_risco_api            │   │
-│  │  (prioriza risco_ia, fallback PL/SQL)       │   │
-│  └──────────────────┬──────────────────────────┘   │
-│                     │                               │
-│  ┌──────────────────▼──────────────────────────┐   │
-│  │        Tabela: areas_risco                  │   │
-│  │  + Função PL/SQL: calcular_risco()          │   │
-│  │  + Coluna: risco_ia (resultado da IA)       │   │
-│  └─────────────────────────────────────────────┘   │
-└─────────────────────┬───────────────────────────────┘
-                      │ lê/escreve previsões
-                      ▼
-┌─────────────────────────────────────────────────────┐
-│           Python + Random Forest                    │
-│                                                     │
-│  1. Lê dados do Oracle                              │
-│  2. Pré-processa (taxa por 1000 hab)                │
-│  3. Classifica: baixo / medio / alto                │
-│  4. Salva risco_ia de volta no Oracle               │
-└─────────────────────────────────────────────────────┘
-```
- 
----
- 
-## ⚙️ Funcionalidades
- 
-### App Mobile
-- Mapa interativo com OpenStreetMap
-- Visualização das áreas de risco com círculos coloridos
-- Verde = baixo risco, Amarelo = médio risco, Vermelho = alto risco
-- Tratamento de erro quando API está indisponível
-- Dependência total do Oracle APEX para funcionamento
-### Oracle APEX
-- CRUD completo visual (criar, listar, editar e deletar áreas)
-- Função PL/SQL `calcular_risco` com lógica de negócio real
-- View com regra de priorização do resultado da IA
-- API REST completa com GET, POST, PUT e DELETE
-### Inteligência Artificial
-- Modelo Random Forest treinado em Python
-- Classificação de risco em três níveis
-- Acurácia de 100% no dataset de validação
-- Resultado salvo diretamente no banco Oracle
----
- 
 ## 🤖 Modelo de IA
  
-### Algoritmo
+### Algoritmo escolhido
 **Random Forest** — ensemble de 100 árvores de decisão com profundidade máxima de 5.
  
-### Features utilizadas
+Escolhido por ser robusto com datasets pequenos, resistente a overfitting e por trabalhar bem com variáveis numéricas e categóricas simultaneamente.
  
-| Feature | Descrição |
-|---------|-----------|
-| `ocorrencias` | Número de ocorrências registradas na área |
-| `populacao` | População estimada da área |
-| `taxa_ocorrencias` | Ocorrências por 1000 habitantes |
-| `tipo_area_encoded` | Tipo de área codificado (URBANA / PERIFERICA) |
+### Features utilizadas para classificação
+ 
+| Feature | Tipo | Descrição |
+|---------|------|-----------|
+| `ocorrencias` | Numérica | Número de ocorrências registradas na área |
+| `populacao` | Numérica | População estimada da região |
+| `taxa_ocorrencias` | Calculada | Ocorrências por 1000 habitantes |
+| `tipo_area_encoded` | Categórica | Tipo de área: URBANA ou PERIFERICA |
+ 
+### Pré-processamento
+ 
+```python
+# Taxa calculada igual à lógica do PL/SQL Oracle
+df['taxa_ocorrencias'] = (df['ocorrencias'] / df['populacao']) * 1000
+ 
+# Encoding da variável categórica
+le_tipo = LabelEncoder()
+df['tipo_area_encoded'] = le_tipo.fit_transform(df['tipo_area'])
+```
  
 ### Resultado do treinamento
  
 | Métrica | Valor |
 |---------|-------|
-| Acurácia | 100% |
+| Algoritmo | Random Forest |
+| Estimadores | 100 árvores |
+| Acurácia | **100%** |
 | Registros de treino | 160 |
 | Registros de teste | 40 |
-| Classes | baixo, medio, alto |
  
-### Fluxo da IA
- 
-```
-Dados Oracle → Pré-processamento → Random Forest → Previsão → Salvar risco_ia → API → App
-```
- 
-### Arquivos do modelo
- 
-| Arquivo | Descrição |
-|---------|-----------|
-| `modelo_risco.pkl` | Modelo Random Forest treinado |
-| `encoder_tipo.pkl` | Encoder do campo tipo_area |
-| `sos_localiza_ia.ipynb` | Notebook completo com treinamento |
-| `matriz_confusao.png` | Matriz de confusão do modelo |
- 
----
- 
-## 🔌 API REST
- 
-**Base URL:** `https://oracleapex.com/ords/oracle_soslo/risco`
- 
-### Endpoints
- 
-#### GET /areas
-Retorna todas as áreas de risco com classificação da IA.
- 
-**Resposta:**
-```json
-{
-  "items": [
-    {
-      "latitude": -23.692233,
-      "longitude": -46.501288,
-      "risco_previsto": "alto"
-    }
-  ],
-  "count": 25
-}
-```
- 
-#### POST /areas
-Cria uma nova área de risco.
- 
-**Body (Headers):**
-```json
-{
-  "nome": "Área Nova",
-  "latitude": -23.55,
-  "longitude": -46.63,
-  "ocorrencias": 90,
-  "populacao": 5000,
-  "tipo_area": "URBANA"
-}
-```
- 
-#### PUT /areas/:id
-Atualiza uma área existente pelo ID.
- 
-#### DELETE /areas/:id
-Remove uma área pelo ID.
- 
----
- 
-## 📁 Estrutura do Repositório
- 
-```
-sos-localiza/
-├── mobile/
-│   └── (código fonte do app React Native)
-├── ia/
-│   ├── modelo_risco.pkl
-│   ├── encoder_tipo.pkl
-│   ├── matriz_confusao.png
-│   └── sos_localiza_ia.ipynb
-├── banco/
-│   ├── 01_create_table.sql
-│   ├── 02_insert_dados.sql
-│   ├── 03_function_calcular_risco.sql
-│   ├── 04_create_view.sql
-│   └── 05_alter_table_risco_ia.sql
-├── docs/
-│   └── fluxo_arquitetura.png
-└── README.md
-```
- 
----
- 
-## 🚀 Como Executar
- 
-### Pré-requisitos
-- Node.js 18+
-- React Native CLI
-- Python 3.8+
-- Conta Oracle APEX
-### 1. Banco de dados Oracle
-Execute os scripts na pasta `banco/` em ordem:
-```sql
--- 1. Criar tabela
-@01_create_table.sql
- 
--- 2. Inserir dados
-@02_insert_dados.sql
- 
--- 3. Criar função de risco
-@03_function_calcular_risco.sql
- 
--- 4. Criar view
-@04_create_view.sql
- 
--- 5. Adicionar coluna de IA
-@05_alter_table_risco_ia.sql
-```
- 
-### 2. Modelo de IA
-```bash
-# Abrir o notebook no Google Colab
-# ia/sos_localiza_ia.ipynb
- 
-# Ou instalar dependências localmente
-pip install scikit-learn pandas numpy matplotlib seaborn
- 
-# Executar o notebook célula por célula
-```
- 
-### 3. Aplicativo Mobile
-```bash
-# Instalar dependências
-cd mobile
-npm install
- 
-# Atualizar a URL da API em services/apiService.js
-# API_URL = 'https://oracleapex.com/ords/oracle_soslo/risco'
- 
-# Rodar o app
-npx react-native run-android
-# ou
-npx react-native run-ios
-```
- 
----
- 
-## 📊 Resultados
- 
-### Classificação das 25 áreas de São Paulo
- 
-| Nível de Risco | Quantidade | Percentual |
-|---------------|-----------|-----------|
-| 🔴 Alto | 19 áreas | 76% |
-| 🟡 Médio | 4 áreas | 16% |
-| 🟢 Baixo | 2 áreas | 8% |
- 
-### Performance do modelo
+### Relatório de classificação
  
 ```
               precision    recall  f1-score   support
@@ -301,6 +103,234 @@ npx react-native run-ios
  
     accuracy                           1.00        40
 ```
+ 
+### Matriz de Confusão
+ 
+![Matriz de Confusão](matriz_confusao.png)
+ 
+---
+ 
+## 🔗 Integração com Oracle APEX
+ 
+### Lógica de negócio no banco
+ 
+Além do modelo de IA, o Oracle APEX executa uma função PL/SQL chamada `calcular_risco` que serve como fallback quando o resultado da IA ainda não foi calculado para uma área:
+ 
+```sql
+-- Taxa de ocorrências por 1000 habitantes
+v_taxa := (p_ocorrencias / p_populacao) * 1000;
+ 
+-- Score base
+IF v_taxa >= 15 THEN v_score := 3;       -- Alto
+ELSIF v_taxa >= 5 THEN v_score := 2;     -- Médio
+ELSE v_score := 1;                        -- Baixo
+END IF;
+ 
+-- Ajuste por tipo de área
+IF p_tipo_area = 'PERIFERICA' THEN v_score := v_score + 1;
+END IF;
+```
+ 
+### View com priorização da IA
+ 
+```sql
+CREATE OR REPLACE VIEW vw_areas_risco_api AS
+SELECT
+    ROUND(latitude, 6)  AS latitude,
+    ROUND(longitude, 6) AS longitude,
+    CASE
+        WHEN risco_ia IS NOT NULL THEN risco_ia        -- usa resultado da IA
+        ELSE calcular_risco(ocorrencias, populacao, tipo_area)  -- fallback PL/SQL
+    END AS risco_previsto
+FROM areas_risco
+WHERE ativo = 'S';
+```
+ 
+### CRUD completo no APEX
+ 
+O Oracle APEX possui interface visual com CRUD completo da tabela `areas_risco`:
+ 
+| Operação | Descrição |
+|----------|-----------|
+| CREATE | Cadastro de nova área via formulário |
+| READ | Listagem de todas as áreas com Interactive Report |
+| UPDATE | Edição de dados e recálculo de risco |
+| DELETE | Remoção de área com confirmação |
+ 
+---
+ 
+## 🔌 API REST
+ 
+**Base URL:** `https://oracleapex.com/ords/oracle_soslo/risco`
+ 
+### Endpoints disponíveis
+ 
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/areas` | Lista todas as áreas com risco calculado pela IA |
+| POST | `/areas` | Cadastra nova área de risco |
+| PUT | `/areas/:id` | Atualiza dados de uma área |
+| DELETE | `/areas/:id` | Remove uma área |
+ 
+### Exemplo de resposta GET /areas
+ 
+```json
+{
+  "items": [
+    {
+      "latitude": -23.692233,
+      "longitude": -46.501288,
+      "risco_previsto": "alto"
+    },
+    {
+      "latitude": -23.662131,
+      "longitude": -46.519193,
+      "risco_previsto": "medio"
+    },
+    {
+      "latitude": -23.523133,
+      "longitude": -46.599391,
+      "risco_previsto": "baixo"
+    }
+  ],
+  "count": 25
+}
+```
+ 
+---
+ 
+## 🔄 Fluxo de Integração
+ 
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. TREINAMENTO (Google Colab)                          │
+│                                                         │
+│  Dataset (200 registros)                                │
+│       ↓                                                 │
+│  Pré-processamento                                      │
+│       ↓                                                 │
+│  Random Forest → Acurácia 100%                          │
+│       ↓                                                 │
+│  modelo_risco.pkl + encoder_tipo.pkl                    │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  2. INTEGRAÇÃO (Python → Oracle)                        │
+│                                                         │
+│  Carrega modelo_risco.pkl                               │
+│       ↓                                                 │
+│  Lê 25 áreas de São Paulo                              │
+│       ↓                                                 │
+│  Gera previsão: alto / medio / baixo                    │
+│       ↓                                                 │
+│  Salva coluna risco_ia no Oracle                        │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  3. EXPOSIÇÃO (Oracle APEX + ORDS)                      │
+│                                                         │
+│  View vw_areas_risco_api                                │
+│       ↓                                                 │
+│  API REST GET /risco/areas                              │
+│       ↓                                                 │
+│  JSON com latitude, longitude, risco_previsto           │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  4. CONSUMO (App Mobile React Native)                   │
+│                                                         │
+│  Fetch API → Plota no mapa → Exibe risco por cor        │
+└─────────────────────────────────────────────────────────┘
+```
+ 
+---
+ 
+## 📊 Evidências de Execução
+ 
+### Previsões geradas pelo modelo para as 25 áreas
+ 
+| Nível de Risco | Quantidade | Percentual |
+|---------------|-----------|-----------|
+| 🔴 Alto | 19 áreas | 76% |
+| 🟡 Médio | 4 áreas | 16% |
+| 🟢 Baixo | 2 áreas | 8% |
+ 
+### API retornando resultado da IA
+ 
+A API em produção pode ser acessada em:
+```
+https://oracleapex.com/ords/oracle_soslo/risco/areas
+```
+ 
+### Log de execução
+ 
+Veja o arquivo `sos_localiza.log` para detalhes completos da execução do modelo.
+ 
+---
+ 
+## 🚀 Como Executar
+ 
+### Pré-requisitos
+- Python 3.8+
+- Conta Oracle APEX
+- Google Colab (recomendado) ou Jupyter Notebook
+### 1. Instalar dependências Python
+ 
+```bash
+pip install scikit-learn pandas numpy matplotlib seaborn
+```
+ 
+### 2. Executar o notebook de IA
+ 
+```
+Abrir: sos_localiza_ia.ipynb no Google Colab
+Executar todas as células em ordem
+```
+ 
+O notebook irá:
+- Criar o dataset de treinamento
+- Treinar o modelo Random Forest
+- Gerar a matriz de confusão
+- Salvar `modelo_risco.pkl` e `encoder_tipo.pkl`
+- Aplicar previsões nas 25 áreas reais
+### 3. Configurar o banco Oracle
+ 
+Execute o arquivo `apex_updates.sql` no **SQL Workshop → SQL Commands** do Oracle APEX:
+ 
+```
+Contém:
+- Criação da tabela areas_risco
+- Função PL/SQL calcular_risco
+- View vw_areas_risco_api
+- Inserção das 25 áreas
+- Atualização do risco_ia com resultado da IA
+```
+ 
+### 4. Verificar a API
+ 
+Abra no navegador:
+```
+https://oracleapex.com/ords/oracle_soslo/risco/areas
+```
+ 
+Deve retornar JSON com as 25 áreas e o campo `risco_previsto` preenchido pelo modelo de IA.
+ 
+---
+ 
+## 📁 Arquivos do Repositório
+ 
+| Arquivo | Descrição |
+|---------|-----------|
+| `README.md` | Documentação completa do projeto |
+| `sos_localiza_ia.ipynb` | Notebook com treinamento completo do modelo |
+| `modelo_risco.pkl` | Modelo Random Forest serializado |
+| `encoder_tipo.pkl` | Encoder do campo tipo_area |
+| `matriz_confusao.png` | Evidência visual do modelo treinado |
+| `apex_updates.sql` | Scripts SQL completos do Oracle APEX |
+| `sos_localiza.log` | Log de execução com entradas e saídas da IA |
  
 ---
  
@@ -314,7 +344,5 @@ npx react-native run-ios
  
 ---
  
-## 📄 Licença
- 
-Este projeto foi desenvolvido para fins acadêmicos — FIAP 2026.
+*Projeto acadêmico desenvolvido na FIAP — 2026*
  
