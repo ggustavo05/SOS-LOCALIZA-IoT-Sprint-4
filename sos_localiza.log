@@ -1,0 +1,32 @@
+
+=== SOS Localiza - Log de Execução da IA ===
+
+Data de execução: 11/04/2026
+
+--- Modelo ---
+Algoritmo: Random Forest
+Estimadores: 100
+Profundidade máxima: 5
+Semente: 42
+
+--- Dataset ---
+Total de registros: 200
+Registros de treino: 160
+Registros de teste: 40
+
+--- Resultado ---
+Acurácia: 100.00%
+Precision (alto):  1.00
+Precision (medio): 1.00
+Precision (baixo): 1.00
+
+--- Previsões aplicadas ---
+Total de áreas atualizadas: 25
+  Alto:  19 áreas
+  Médio:  4 áreas
+  Baixo:  2 áreas
+
+--- Integração ---
+API Oracle APEX: https://oracleapex.com/ords/oracle_soslo/risco/areas
+Status: OK - 25 registros retornados
+Coluna risco_ia atualizada no banco: SIM
