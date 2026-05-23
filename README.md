@@ -39,6 +39,16 @@ O resultado da IA é salvo diretamente no banco Oracle e exposto via API REST, s
 > Vídeo de aproximadamente 5 minutos demonstrando o modelo de IA treinado, a integração com Oracle APEX e o funcionamento da API REST.
  
 ---
+
+---
+ 
+## API REST
+ 
+📹 **Link da API:** [[APEX](https://oracleapex.com/ords/oracle_soslo/risco/areas)]
+ 
+> Oracle APEX e o funcionamento da API REST.
+ 
+---
  
 ## 🛠️ Tecnologias Utilizadas
  
